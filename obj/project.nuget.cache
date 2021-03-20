@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "naQBgRA5hx/KTKbotxDxkHJ/iQ289L/4lVnQLDIR7qS6htkmuhjX9AEYFKF864+r1NDQ65PgFO5/1aTZGAEnCQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Administrator\\Documents\\My Games\\Terraria\\ModLoader\\Mod Sources\\EvE\\EvE.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Administrator\\.nuget\\packages\\tmodloader.codeassist\\0.1.1\\tmodloader.codeassist.0.1.1.nupkg.sha512"
+  ],
+  "logs": []
+}
