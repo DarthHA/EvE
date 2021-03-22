@@ -11,7 +11,7 @@ namespace EvE
 
         [Label("$Mods.EvE.EvEMeleeDamage")]
         [Increment(1)]
-        [Range(1, 50)]
+        [Range(1, 100)]
         [DefaultValue(1)]
         [Slider]
         public int MeleeDamageMultiplier;
@@ -19,11 +19,18 @@ namespace EvE
 
         [Label("$Mods.EvE.EvEProjDamage")]
         [Increment(1)]
-        [Range(1, 50)]
+        [Range(1, 100)]
         [DefaultValue(1)]
         [Slider]
         public int ProjDamageMultiplier;
 
+
+        [Label("$Mods.EvE.EvEDotDamage")]
+        [Increment(1)]
+        [Range(1, 300)]
+        [DefaultValue(1)]
+        [Slider]
+        public int DotMultiplier;
 
         public override ModConfig Clone()
         {
@@ -34,6 +41,7 @@ namespace EvE
         public override void OnLoaded()
         {
             EvE.config = this;
+            TranslationUtils.AddTranslation("EvEDotDamage", "Debuff damage multifier dealt during the Super Smash.", "大乱斗中负面效果伤害系数。");
             TranslationUtils.AddTranslation("EvEMeleeDamage", "Melee damage multiplier dealt during the Super Smash.", "大乱斗中近战伤害系数。");
             TranslationUtils.AddTranslation("EvEProjDamage", "Projectile damage multifier dealt during the Super Smash.", "大乱斗中射弹伤害系数。");
         }

@@ -3,8 +3,30 @@ Note: This mod might seriously affect the normal progress of the game, or even c
 It is recommended to play it with Hero's Mod or Cheat Sheet Mod.
 Pure entertainment mod, have fun!
 
+Changelog:
+v0.2
+-Fixed the issue about Old One's Army enemies.
+v0.3
+-Fixed the bug about NPC death.
+-After the death of the marked creature, its minions can be marked again.
+v0.4
+-Now the enemies can apply debuff to each other.
+-Increased the range of damage multiplier in config.
+-Updated Mod icon.
+
 
 使用标记器让两只怪物，甚至是Boss打起来！
 注意：该mod可能会严重影响游戏的正常运行，甚至会让游戏崩溃。当然我在尽量避免这一点！
 建议配合Hero's Mod或者Cheat Sheet Mod游玩。
 纯娱乐mod，玩的开心！
+
+更新日志：
+v0.2
+-修复了与旧日军团有关的问题。
+v0.3
+-修复与NPC死亡相关bug。
+-原标记目标的仆从在目标死后可以继续被标记为目标。
+v0.4
+-现在乱斗双方可以互相施加负面效果。
+-增加了config里伤害调整的范围。
+-更新了模组图标。

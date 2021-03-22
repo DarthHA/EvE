@@ -102,9 +102,12 @@ namespace EvE.Items
 
 		private bool Contains(NPC npc, Vector2 Pos)
 		{
-			if (Pos.X > npc.Center.X - npc.width / 2 && Pos.X < npc.Center.X + npc.width / 2)
+			int width = npc.width < 16 ? 16 : npc.width;
+			int height = npc.height < 16 ? 16 : npc.height;
+
+			if (Pos.X > npc.Center.X - width / 2 && Pos.X < npc.Center.X + width / 2)
 			{
-				if (Pos.Y > npc.Center.Y - npc.height / 2 && Pos.Y < npc.Center.Y + npc.height / 2)
+				if (Pos.Y > npc.Center.Y - height / 2 && Pos.Y < npc.Center.Y + height / 2)
 				{
 					return true;
 				}

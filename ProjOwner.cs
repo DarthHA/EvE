@@ -65,7 +65,10 @@ namespace EvE
             }
             return true;
         }
-
+        public override void PostAI(NPC npc)
+        {
+            EvE.UpdateOwner(npc);
+        }
         /*
         public override void AI(NPC npc)
         {
@@ -111,6 +114,10 @@ namespace EvE
     {
         public override bool InstancePerEntity => true;
         public int OwnerWMI = -1;
+        public override void PostAI(Projectile projectile)
+        {
+            EvE.UpdateOwner(projectile);
+        }
         //private bool flag = false;
         /*
         public override void AI(Projectile projectile)

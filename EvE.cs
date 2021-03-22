@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.Utilities;
 
 namespace EvE
 {
@@ -44,10 +46,12 @@ namespace EvE
             On.Terraria.NPC.checkDead += new On.Terraria.NPC.hook_checkDead(CheckDeadHook);
             On.Terraria.NPC.SetDefaults += new On.Terraria.NPC.hook_SetDefaults(NPCSetDefHook);
             On.Terraria.NPC.TargetClosest += new On.Terraria.NPC.hook_TargetClosest(TargetClosestHook);
+            On.Terraria.Utilities.NPCUtils.SearchForTarget_NPC_Vector2_TargetSearchFlag_SearchFilter1_SearchFilter1 += new On.Terraria.Utilities.NPCUtils.hook_SearchForTarget_NPC_Vector2_TargetSearchFlag_SearchFilter1_SearchFilter1(SearchForTargetHook);
             On.Terraria.Player.FindClosest += new On.Terraria.Player.hook_FindClosest(FindClosestHook);
             On.Terraria.Player.KillMe += new On.Terraria.Player.hook_KillMe(KillMeHook);
             On.Terraria.Player.KillMeForGood += new On.Terraria.Player.hook_KillMeForGood(KillMeForGoodHook);
             On.Terraria.Player.Ghost += new On.Terraria.Player.hook_Ghost(GhostHook);
+            On.Terraria.Player.AddBuff += new On.Terraria.Player.hook_AddBuff(AddBuffHook);
         }
 
 
@@ -64,69 +68,7 @@ namespace EvE
             }
         }
 
-        public static void TargetClosestHook(On.Terraria.NPC.orig_TargetClosest orig, NPC self, bool faceTarget)
-        {
-            if (IsOrBelongsToNPCID(self) == EnemyA)
-            {
-                if (EnemyB != -1)
-                {
-                    if (Main.npc[EnemyB].active && FakePlayer.Dummy2Available())
-                    {
-                        Main.player[FakePlayer2].dead = false;
-                        Main.player[FakePlayer2].Center = Main.npc[EnemyB].Center;
-                        AnotherTargetSelect(self, FakePlayer2, faceTarget);
-                        return;
-                    }
-                }
-            }
-
-            if (IsOrBelongsToNPCID(self) == EnemyB)
-            {
-                if (EnemyA != -1)
-                {
-                    if (Main.npc[EnemyA].active && FakePlayer.Dummy1Available())
-                    {
-                        Main.player[FakePlayer1].dead = false;
-                        Main.player[FakePlayer1].Center = Main.npc[EnemyA].Center;
-                        AnotherTargetSelect(self, FakePlayer1, faceTarget);
-                        return;
-                    }
-                }
-            }
-
-            orig.Invoke(self, faceTarget);
-        }
-        public static byte FindClosestHook(On.Terraria.Player.orig_FindClosest orig, Vector2 Position, int Width, int Height)
-        {
-            if (NewXXXState == "Projectile")
-            {
-                if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI != -1)
-                {
-                    if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EnemyA)
-                    {
-                        if (EnemyB != -1)
-                        {
-                            if(Main.npc[EnemyB].active && FakePlayer.Dummy2Available())
-                            {
-                                return FakePlayer2;
-                            }
-                        }
-                    }
-
-                    if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EnemyB)
-                    {
-                        if (EnemyA != -1)
-                        {
-                            if (Main.npc[EnemyA].active && FakePlayer.Dummy1Available())
-                            {
-                                return FakePlayer1;
-                            }
-                        }
-                    }
-                }
-            }
-            return orig.Invoke(Position, Width, Height);
-        }
+        
         public static void AnotherTargetSelect(NPC self, int target, bool faceTarget)
         {
             if (Main.player[target].active)
@@ -157,14 +99,54 @@ namespace EvE
                         self.directionY = -1;
                     }
                 }
-                /*
+                
                 if (self.confused)
                 {
                     self.direction *= -1;
                 }
-                */
+                
             }
         }
+        public static NPCUtils.TargetSearchResults AnotherDD2TargetSelect(NPC searcher, Vector2 position, int Target, NPCUtils.TargetSearchFlag flags = NPCUtils.TargetSearchFlag.All, NPCUtils.SearchFilter<NPC> npcFilter = null)
+        {
+            float nearestNPCDistance = float.MaxValue;
+            int nearestNPCIndex = -1;
+            float nearestAdjustedTankDistance = float.MaxValue;
+            float nearestTankDistance = float.MaxValue;
+            int nearestTankIndex = -1;
+            NPCUtils.TargetType tankType = NPCUtils.TargetType.Player;
+
+
+            if (flags.HasFlag(NPCUtils.TargetSearchFlag.Players))
+            {
+                Player player = Main.player[Target];
+                nearestTankIndex = Target;
+                nearestTankDistance = searcher.Distance(player.Center);
+                nearestAdjustedTankDistance = searcher.Distance(player.Center);
+                tankType = NPCUtils.TargetType.Player;
+            }
+            else if (flags.HasFlag(NPCUtils.TargetSearchFlag.NPCs))
+            {
+                for (int i = 0; i < 200; i++)
+                {
+                    NPC npc = Main.npc[i];
+                    if (npc.active && (npcFilter == null || npcFilter(npc)))
+                    {
+                        float dist = Vector2.DistanceSquared(position, npc.Center);
+                        if (dist < nearestNPCDistance)
+                        {
+                            nearestNPCIndex = i;
+                            nearestNPCDistance = dist;
+                        }
+                    }
+                }
+            }
+
+
+            return new NPCUtils.TargetSearchResults(searcher, nearestNPCIndex, (float)Math.Sqrt(nearestNPCDistance), nearestTankIndex, nearestTankDistance, nearestAdjustedTankDistance, tankType);
+        }
+        
+
 
         public static bool BelongsToDummy(Player player)
         {
@@ -206,7 +188,157 @@ namespace EvE
             }
         }
 
+        
+        public static void UpdateOwner(NPC npc)
+        {
+            if (npc.GetGlobalNPC<ProjectileOwnerGNPC>().OwnerWMI != -1)
+            {
+                if (!Main.npc[npc.GetGlobalNPC<ProjectileOwnerGNPC>().OwnerWMI].active)
+                {
+                    npc.GetGlobalNPC<ProjectileOwnerGNPC>().OwnerWMI = -1;
+                }
+            }
+        }
+
+        public static void UpdateOwner(Projectile proj)
+        {
+            if (proj.GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI != -1)
+            {
+                if (!Main.npc[proj.GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI].active)
+                {
+                    proj.GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI = -1;
+                }
+            }
+        }
+
+
+
         #region Patch相关
+
+        public static void TargetClosestHook(On.Terraria.NPC.orig_TargetClosest orig, NPC self, bool faceTarget)
+        {
+            if (IsOrBelongsToNPCID(self) == EnemyA)
+            {
+                if (EnemyB != -1)
+                {
+                    if (Main.npc[EnemyB].active && FakePlayer.Dummy2Available())
+                    {
+                        Main.player[FakePlayer2].dead = false;
+                        Main.player[FakePlayer2].Center = Main.npc[EnemyB].Center;
+                        AnotherTargetSelect(self, FakePlayer2, faceTarget);
+                        return;
+                    }
+                }
+            }
+
+            if (IsOrBelongsToNPCID(self) == EnemyB)
+            {
+                if (EnemyA != -1)
+                {
+                    if (Main.npc[EnemyA].active && FakePlayer.Dummy1Available())
+                    {
+                        Main.player[FakePlayer1].dead = false;
+                        Main.player[FakePlayer1].Center = Main.npc[EnemyA].Center;
+                        AnotherTargetSelect(self, FakePlayer1, faceTarget);
+                        return;
+                    }
+                }
+            }
+            orig.Invoke(self, faceTarget);
+        }
+
+        public static byte FindClosestHook(On.Terraria.Player.orig_FindClosest orig, Vector2 Position, int Width, int Height)
+        {
+            if (NewXXXState == "Projectile")
+            {
+                if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI != -1)
+                {
+                    if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EnemyA)
+                    {
+                        if (EnemyB != -1)
+                        {
+                            if (Main.npc[EnemyB].active && FakePlayer.Dummy2Available())
+                            {
+                                return FakePlayer2;
+                            }
+                        }
+                    }
+
+                    if (Main.projectile[NewXXXSource].GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EnemyB)
+                    {
+                        if (EnemyA != -1)
+                        {
+                            if (Main.npc[EnemyA].active && FakePlayer.Dummy1Available())
+                            {
+                                return FakePlayer1;
+                            }
+                        }
+                    }
+                }
+            }
+            return orig.Invoke(Position, Width, Height);
+        }
+
+        public static NPCUtils.TargetSearchResults SearchForTargetHook(On.Terraria.Utilities.NPCUtils.orig_SearchForTarget_NPC_Vector2_TargetSearchFlag_SearchFilter1_SearchFilter1 orig, NPC searcher, Vector2 position, NPCUtils.TargetSearchFlag flags = NPCUtils.TargetSearchFlag.All, NPCUtils.SearchFilter<Player> playerFilter = null, NPCUtils.SearchFilter<NPC> npcFilter = null)
+        {
+            if (IsOrBelongsToNPCID(searcher) == EnemyA)
+            {
+                if (EnemyB != -1)
+                {
+                    if (Main.npc[EnemyB].active && FakePlayer.Dummy2Available())
+                    {
+                        Main.player[FakePlayer2].dead = false;
+                        Main.player[FakePlayer2].Center = Main.npc[EnemyB].Center;
+                        return AnotherDD2TargetSelect(searcher, position, FakePlayer2, flags, npcFilter);
+
+                    }
+                }
+            }
+
+            if (IsOrBelongsToNPCID(searcher) == EnemyB)
+            {
+                if (EnemyA != -1)
+                {
+                    if (Main.npc[EnemyA].active && FakePlayer.Dummy1Available())
+                    {
+                        Main.player[FakePlayer1].dead = false;
+                        Main.player[FakePlayer1].Center = Main.npc[EnemyA].Center;
+                        return AnotherDD2TargetSelect(searcher, position, FakePlayer1, flags, npcFilter);
+
+                    }
+                }
+            }
+            return orig.Invoke(searcher, position, flags, playerFilter, npcFilter);
+        }
+
+
+        public static void AddBuffHook(On.Terraria.Player.orig_AddBuff orig,Player self,int type,int time1,bool quiet)
+        {
+            if (self.whoAmI == FakePlayer1)
+            {
+                if (EnemyA != -1)
+                {
+                    if (Main.npc[EnemyA].active)
+                    {
+                        Main.npc[EnemyA].AddBuff(type, time1, quiet);
+                    }
+                }
+                return;
+            }
+
+            if (self.whoAmI == FakePlayer2)
+            {
+                if (EnemyB != -1)
+                {
+                    if (Main.npc[EnemyB].active)
+                    {
+                        Main.npc[EnemyB].AddBuff(type, time1, quiet);
+                    }
+                }
+                return;
+            }
+            orig.Invoke(self, type, time1, quiet);
+        }
 
         public static void GhostHook(On.Terraria.Player.orig_Ghost orig, Player self)
         {
@@ -341,6 +473,7 @@ namespace EvE
         {
             if (!npc.active) return -1;
             if (npc.type >= NPCID.EaterofWorldsHead && npc.type <= NPCID.EaterofWorldsTail) return -1;
+
             if (npc.modNPC != null)
             {
                 if (npc.modNPC.mod.Name == "MABBossChallenge" || npc.modNPC.mod.Name == "MentalAIBoost")
@@ -351,8 +484,10 @@ namespace EvE
                     }
                 }
             }
+            
             int target = npc.GetGlobalNPC<ProjectileOwnerGNPC>().OwnerWMI;
-            if (target == -1 || !Main.npc[target].active) return npc.whoAmI;
+            if (target == -1 || target == npc.whoAmI) return npc.whoAmI;
+            if(!Main.npc[target].active) return npc.whoAmI;
             if (Main.npc[target].GetGlobalNPC<ProjectileOwnerGNPC>().OwnerWMI != -1)
             {
                 return GetSource(Main.npc[target]);

@@ -31,7 +31,6 @@ namespace EvE
 			{
 				return;
 			}
-			//仆从不行
 			if (Main.projPet[projectile.type] && projectile.type != 266 && projectile.type != 407 && projectile.type != 317 && (projectile.type != 388 || projectile.ai[0] != 2f) && (projectile.type < 390 || projectile.type > 392) && (projectile.type < 393 || projectile.type > 395) && (projectile.type != 533 || projectile.ai[0] < 6f || projectile.ai[0] > 8f) && (projectile.type < 625 || projectile.type > 628) && !ProjectileLoader.MinionContactDamage(projectile))
 			{
 				return;
@@ -79,7 +78,7 @@ namespace EvE
 							if (flag3 == null || flag3.Value)
 							{
 								bool flag5 = (flag2 != null && flag2.Value) || (flag3 != null && flag3.Value);
-								if ((projectile.hostile && !projectile.friendly && CheckForHit(projectile, Main.npc[i]) && !Main.npc[i].dontTakeDamage) && Main.npc[i].immune[255] == 0)                 //重点判定
+								if (projectile.hostile && !projectile.friendly && CheckForHit(projectile, Main.npc[i]) && !Main.npc[i].dontTakeDamage && Main.npc[i].immune[255] == 0)                 //重点判定
 								{
 									bool flag6 = false;
 									if (projectile.type == 11 && (Main.npc[i].type == NPCID.CorruptBunny || Main.npc[i].type == NPCID.CorruptGoldfish))
@@ -104,8 +103,8 @@ namespace EvE
 									}
 									if (!flag6 && (Main.npc[i].noTileCollide || !projectile.ownerHitCheck || projectile.CanHit(Main.npc[i])))
 									{
-										bool flag7;
-										if (Main.npc[i].type == NPCID.SolarCrawltipedeTail)
+                                        bool flag7;
+                                        if (Main.npc[i].type == NPCID.SolarCrawltipedeTail)
 										{
 											Rectangle rect = Main.npc[i].getRect();
 											int num5 = 8;
@@ -137,10 +136,10 @@ namespace EvE
 											if (projectile.type > 0 && ProjectileID.Sets.StardustDragon[projectile.type])
 											{
 												float num7 = (projectile.scale - 1f) * 100f;
-												num7 = Utils.Clamp<float>(num7, 0f, 50f);
-												num6 = (int)((float)num6 * (1f + num7 * 0.23f));
+												num7 = Utils.Clamp(num7, 0f, 50f);
+												num6 = (int)(num6 * (1f + num7 * 0.23f));
 											}
-											int num8 = Main.DamageVar((float)num6);
+											int num8 = Main.DamageVar(num6);
 											bool flag8 = !projectile.npcProj && !projectile.trap;
 											if (projectile.trap && NPCID.Sets.BelongsToInvasionOldOnesArmy[Main.npc[i].type])
 											{
@@ -149,20 +148,20 @@ namespace EvE
 											if ((projectile.type == 400 || projectile.type == 401 || projectile.type == 402) && Main.npc[i].type >= NPCID.EaterofWorldsHead && Main.npc[i].type <= NPCID.EaterofWorldsTail)
 											{
 												num8 = (int)(num8 * 0.65);
-												/*
+												
 												if (projectile.penetrate > 1)
 												{
-													projectile.penetrate--;                //不穿透
+													projectile.penetrate--;
 												}
-												*/
+												
 											}
 											if (projectile.type == 710)
 											{
 												Point origin = projectile.Center.ToTileCoordinates();
-												if (!WorldUtils.Find(origin, Searches.Chain(new Searches.Down(12), new GenCondition[]
+                                                if (!WorldUtils.Find(origin, Searches.Chain(new Searches.Down(12), new GenCondition[]
 												{
 																new Conditions.IsSolid()
-												}), out Point point))
+												}), out _))
 												{
 													num8 = (int)(num8 * 1.5f);
 												}
@@ -212,7 +211,7 @@ namespace EvE
 												{
 													projectile.timeLeft = 3;
 												}
-												if (Main.npc[i].position.X + (float)(Main.npc[i].width / 2) < projectile.position.X + (float)(projectile.width / 2))
+												if (Main.npc[i].position.X + Main.npc[i].width / 2 < projectile.position.X + projectile.width / 2)
 												{
 													projectile.direction = -1;
 												}
@@ -227,7 +226,7 @@ namespace EvE
 												{
 													projectile.timeLeft = 3;
 												}
-												if (Main.npc[i].position.X + (float)(Main.npc[i].width / 2) < projectile.position.X + (float)(projectile.width / 2))
+												if (Main.npc[i].position.X + Main.npc[i].width / 2 < projectile.position.X + (float)(projectile.width / 2))
 												{
 													projectile.direction = -1;
 												}
@@ -238,7 +237,7 @@ namespace EvE
 											}
 											else if (projectile.aiStyle == 50)
 											{
-												if (Main.npc[i].position.X + (float)(Main.npc[i].width / 2) < projectile.position.X + (float)(projectile.width / 2))
+												if (Main.npc[i].position.X + Main.npc[i].width / 2 < projectile.position.X + projectile.width / 2)
 												{
 													projectile.direction = -1;
 												}
@@ -250,7 +249,7 @@ namespace EvE
 											if (projectile.type == 598 || projectile.type == 636 || projectile.type == 614)
 											{
 												projectile.ai[0] = 1f;
-												projectile.ai[1] = (float)i;
+												projectile.ai[1] = i;
 												projectile.velocity = (Main.npc[i].Center - projectile.Center) * 0.75f;
 												projectile.netUpdate = true;
 											}
@@ -275,7 +274,7 @@ namespace EvE
 											{
 												if (projectile.ai[1] == 0f)
 												{
-													projectile.ai[1] = (float)(i + 1);
+													projectile.ai[1] = i + 1;
 													projectile.netUpdate = true;
 												}
 											}
@@ -291,16 +290,16 @@ namespace EvE
 												{
 													projectile.ai[1] = 0f;
 													int num14 = -i - 1;
-													projectile.ai[0] = (float)num14;
+													projectile.ai[0] = num14;
 													projectile.velocity = Main.npc[i].Center - projectile.Center;
 												}
 												if (projectile.ai[0] == 2f)
 												{
-													num8 = (int)((double)num8 * 1.35);
+													num8 = (int)(num8 * 1.35);
 												}
 												else
 												{
-													num8 = (int)((double)num8 * 0.15);
+													num8 = (int)(num8 * 0.15);
 												}
 											}
 
@@ -317,7 +316,7 @@ namespace EvE
 											}
 											if (Main.netMode != NetmodeID.Server && Main.npc[i].type == NPCID.CultistBoss && projectile.type >= 0 && ProjectileID.Sets.Homing[projectile.type])
 											{
-												num8 = (int)((float)num8 * 0.75f);
+												num8 = (int)(num8 * 0.75f);
 											}
 											if (projectile.type == 323 && (Main.npc[i].type == NPCID.VampireBat || Main.npc[i].type == NPCID.Vampire))
 											{
@@ -341,15 +340,17 @@ namespace EvE
 											int hitDirection = projectile.direction;
 											ProjectileLoader.ModifyHitNPC(projectile, Main.npc[i], ref num8, ref num22, ref flag9, ref hitDirection);
 											NPCLoader.ModifyHitByProjectile(Main.npc[i], projectile, ref num8, ref num22, ref flag9, ref hitDirection);
-											PlayerHooks.ModifyHitNPCWithProj(projectile, Main.npc[i], ref num8, ref num22, ref flag9, ref hitDirection);
+											//PlayerHooks.ModifyHitNPCWithProj(projectile, Main.npc[i], ref num8, ref num22, ref flag9, ref hitDirection);
+											AddBuffToTheEnemy(projectile, Main.npc[i]);
+
 											projectile.StatusNPC(i);
 											if (projectile.type == 317)
 											{
 												projectile.ai[1] = -1f;
 												projectile.netUpdate = true;
 											}
-											int num23;
-											if (flag8)
+                                            int num23;
+                                            if (flag8)
 											{
 												num23 = (int)Main.npc[i].StrikeNPC(num8, num22, hitDirection, flag9, false, false);
 											}
@@ -361,7 +362,7 @@ namespace EvE
 											{
 												if (flag9)
 												{
-													NetMessage.SendData(MessageID.StrikeNPC, -1, -1, null, i, (float)num8, num22, (float)projectile.direction, 1, 0, 0);
+													NetMessage.SendData(MessageID.StrikeNPC, -1, -1, null, i, num8, num22, projectile.direction, 1, 0, 0);
 												}
 												else
 												{
@@ -478,11 +479,11 @@ namespace EvE
 											}
 											ProjectileLoader.OnHitNPC(projectile, Main.npc[i], num23, num22, flag9);
 											NPCLoader.OnHitByProjectile(Main.npc[i], projectile, num23, num22, flag9);
-											PlayerHooks.OnHitNPCWithProj(projectile, Main.npc[i], num23, num22, flag9);
+											
+											//PlayerHooks.OnHitNPCWithProj(projectile, Main.npc[i], num23, num22, flag9);
 											if (projectile.penetrate > 0)
 											{
-
-												//projectile.penetrate--;         防止没了
+												projectile.penetrate--;         //防止没了
 												if (projectile.penetrate == 0)
 												{
 													break;
@@ -657,6 +658,62 @@ namespace EvE
 			Projectile.NewProjectile(vector2, vector, ProjectileID.MonkStaffT2Ghast, projectile.damage, 0f, projectile.owner, 0f, 0f);
 		}
 
+
+		private void AddBuffToTheEnemy(Projectile proj, NPC npc)
+		{
+			switch (proj.type)
+			{
+				case ProjectileID.Stinger:
+				case ProjectileID.PoisonSeedPlantera:
+				case ProjectileID.SalamanderSpit:
+					if (Main.rand.Next(2) == 0)
+					{
+						npc.AddBuff(BuffID.Poisoned, Main.rand.Next(300) + 300);
+					}
+					break;
+				case 436:           //混乱
+					if (Main.rand.Next(3) > 1)
+					{
+						npc.AddBuff(31, 300);
+					}
+					break;
+				case ProjectileID.CursedFlameHostile:
+				case ProjectileID.EyeFire:
+					if (Main.rand.Next(3) == 0)
+					{
+						npc.AddBuff(BuffID.CursedInferno, 420);
+					}
+					break;
+				case ProjectileID.GoldenShowerHostile:
+					npc.AddBuff(BuffID.Ichor, 420);
+					break;
+				case ProjectileID.FireArrow:
+                    if (Main.rand.Next(3) == 0)
+                    {
+						npc.AddBuff(BuffID.OnFire, 420);
+                    }
+					break;
+				case ProjectileID.DD2BetsyFlameBreath:
+					npc.AddBuff(BuffID.OnFire, 600);
+					break;
+				case ProjectileID.Fireball:
+					if (Main.rand.Next(2) == 0)
+					{
+						npc.AddBuff(BuffID.OnFire, 300 + Main.rand.Next(120));
+					}
+					break;
+			}
+
+            if (proj.GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EvE.EnemyA)
+            {
+				ProjectileLoader.OnHitPlayer(proj, Main.player[EvE.FakePlayer2], 1, false);
+            }
+			else if(proj.GetGlobalProjectile<ProjectileOwnerGProj>().OwnerWMI == EvE.EnemyB)
+            {
+				ProjectileLoader.OnHitPlayer(proj, Main.player[EvE.FakePlayer1], 1, false);
+			}
+		}
+
 	}
 
 	public class EvEDamageNPC : GlobalNPC
@@ -669,7 +726,20 @@ namespace EvE
 			}
 		}
 
-		public void MeleeHit(NPC npc)
+		public override void UpdateLifeRegen(NPC npc, ref int damage)
+		{
+			if (EvE.IsOrBelongsToNPCID(npc) == EvE.EnemyA || EvE.IsOrBelongsToNPCID(npc) == EvE.EnemyB)
+			{
+				if (npc.lifeRegen < 0)
+				{
+					npc.lifeRegen *= EvE.config.DotMultiplier;
+					damage = npc.lifeRegen * 60;
+				}
+			}
+        }
+
+
+        public void MeleeHit(NPC npc)
 		{
 
 			if (npc.dontTakeDamage)
@@ -695,12 +765,7 @@ namespace EvE
 							{
 								int dmg = attacker.damage;
 								dmg *= EvE.config.MeleeDamageMultiplier;
-								/*
-								if (npc.HasBuff(ModContent.BuffType<FerventAdoration2>()))
-								{
-									dmg *= 5;
-								}
-								*/
+
 								float kb = 6f;
 								int hitDirection = 1;
 								if (attacker.Center.X > npc.Center.X)
@@ -716,8 +781,8 @@ namespace EvE
 								}
 								npc.netUpdate = true;
 								npc.immune[254] = immuneTime;
+								AddBuffToTheEnemy(attacker, npc);
 								NPCLoader.OnHitNPC(attacker, npc, (int)realDmg, kb, crit);
-
 							}
 						}
 					}
@@ -768,6 +833,114 @@ namespace EvE
 			return true;
 		}
 
+		private void AddBuffToTheEnemy(NPC attacker,NPC target)
+        {
+            switch (attacker.type)
+            {
+				case 141:
+					if (Main.rand.Next(2) == 0)
+					{
+						target.AddBuff(BuffID.Poisoned, 600);
+					}
+					break;
+				case NPCID.QueenBee:
+                    if (Main.expertMode)
+                    {
+						target.AddBuff(BuffID.Poisoned, 120 + Main.rand.Next(360));
+                    }
+					break;
+				case NPCID.Bee:
+				case NPCID.BeeSmall:
+					if (Main.expertMode)
+					{
+						target.AddBuff(BuffID.Poisoned, 120 + Main.rand.Next(240));
+					}
+					break;
+				case NPCID.BrainofCthulhu:
+					if (Main.rand.Next(243) <= 11 && Main.expertMode)
+                    {
+						target.AddBuff(BuffID.Poisoned, 160 + Main.rand.Next(155));
+                    }
+					if (Main.rand.Next(243) < 2 && Main.expertMode)
+					{
+						target.AddBuff(BuffID.Confused, 45 + Main.rand.Next(45));
+					}
+					break;
+				case NPCID.Creeper:
+					if (Main.rand.Next(81) <= 11 && Main.expertMode)
+					{
+						target.AddBuff(BuffID.Poisoned, 160 + Main.rand.Next(155));
+					}
+					if (Main.rand.Next(81) <= 2 && Main.expertMode)
+					{
+						target.AddBuff(BuffID.Confused, 45 + Main.rand.Next(45));
+					}
+					break;
+
+				case NPCID.Clown:
+				case NPCID.GiantBat:
+				case NPCID.LightMummy:
+                    if (Main.rand.Next(14) == 0)
+                    {
+						target.AddBuff(BuffID.Confused, 300);
+                    }
+					break;
+
+				case 527:
+					target.AddBuff(BuffID.Confused, 840);
+					break;
+				case 525:
+					target.AddBuff(BuffID.CursedInferno, 420);
+					break;
+				case 526:
+				case NPCID.IchorSticker:
+					target.AddBuff(BuffID.Ichor, 800);
+					break;
+				case NPCID.BlackRecluse:
+				case NPCID.BlackRecluseWall:
+				case 236:
+				case 237:
+                    if (Main.rand.Next(10) == 0)
+                    {
+						target.AddBuff(BuffID.Venom, 480);
+                    }
+					break;
+				case 530:
+				case 531:
+					target.AddBuff(BuffID.Venom, 240 + Main.rand.Next(240));
+					break;
+				case NPCID.MeteorHead:
+                    if (Main.rand.Next(3) == 0)
+                    {
+						target.AddBuff(BuffID.OnFire, 420);
+                    }
+					break;
+				case NPCID.HellArmoredBones:
+				case NPCID.HellArmoredBonesMace:
+				case NPCID.HellArmoredBonesSpikeShield:
+				case NPCID.HellArmoredBonesSword:
+                    if (Main.rand.Next(2) == 0)
+                    {
+						target.AddBuff(BuffID.OnFire, 600);
+                    }
+					break;
+				case 15:
+					if (Main.rand.Next(3) == 0)
+					{
+						target.AddBuff(BuffID.OnFire, 420);
+					}
+					break;
+            }
+            if (EvE.IsOrBelongsToNPCID(attacker) == EvE.EnemyA)
+			{
+				NPCLoader.OnHitPlayer(attacker, Main.player[EvE.FakePlayer2], 1, false);
+            }
+			else if (EvE.IsOrBelongsToNPCID(attacker) == EvE.EnemyB)
+			{
+				NPCLoader.OnHitPlayer(attacker, Main.player[EvE.FakePlayer1], 1, false);
+			}
+
+		}
 
 		private bool CheckForHit(NPC npc1, NPC npc2)
 		{
